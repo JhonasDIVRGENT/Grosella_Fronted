@@ -1,4 +1,5 @@
-// URL del backend Spring Boot. Cambiar cuando se publique (por ejemplo, en Vercel + servidor Docker).
+// URL del backend en producción (ng build / Vercel): Spring Boot en Render.
+// En desarrollo (ng serve) se usa environment.development.ts.
 export const environment = {
-  apiUrl: 'http://localhost:8080/api',
+  apiUrl: 'https://grosella-backend.onrender.com/api',
 };
