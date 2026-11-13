@@ -1,0 +1,51 @@
+<h1>Registrar entrega del pedido</h1>
+<p class="subtitulo">El pedido debe estar “Listo para recojo” y sin saldo pendiente.</p>
+
+<div class="card">
+  <form class="fila" (ngSubmit)="buscar()">
+    <div class="campo">
+      <label for="numero">N° de pedido</label>
+      <input id="numero" name="numero" [(ngModel)]="numero" placeholder="Ej.: P-000126" />
+    </div>
+    <button class="btn btn-secundario" type="submit">Buscar</button>
+  </form>
+</div>
+
+@if (error()) {
+  <div class="alerta alerta-error">{{ error() }}</div>
+}
+
+@if (pedido(); as p) {
+  <div class="card">
+    <h2>Datos del pedido</h2>
+    <div class="datos">
+      <span class="et">Cliente:</span><span class="val">{{ p.cliente.nombreCompleto }}</span>
+      <span class="et">Estado:</span><span><app-estado-badge [estado]="p.estado" /></span>
+      <span class="et">Productos:</span><span class="val">{{ productos(p) }}</span>
+      <span class="et">Sede:</span><span class="val">{{ p.sede }}</span>
+      <span class="et">Total:</span><span class="val">{{ p.total | soles }}</span>
+      <span class="et">Saldo pendiente:</span>
+      <span class="val" [class.verde]="p.saldo === 0" [class.rojo]="p.saldo > 0">{{ p.saldo | soles }}</span>
+    </div>
+
+    @if (p.estado === 'LISTO_PARA_RECOJO' && p.saldo > 0) {
+      <div class="alerta alerta-aviso" style="margin: 16px 0 0">
+        El pedido tiene saldo pendiente. Registre el pago antes de la entrega.
+        <a class="link" [routerLink]="['/pagos']" [queryParams]="{ numero: p.numero }">Registrar pago</a>
+      </div>
+    } @else if (p.estado !== 'LISTO_PARA_RECOJO' && p.estado !== 'ENTREGADO') {
+      <div class="alerta alerta-aviso" style="margin: 16px 0 0">El pedido todavía no está “Listo para recojo”.</div>
+    }
+
+    @if (p.estado !== 'ENTREGADO') {
+      <div class="acciones">
+        <button class="btn btn-primario" (click)="registrarEntrega()"
+                [disabled]="p.estado !== 'LISTO_PARA_RECOJO' || p.saldo > 0">Registrar entrega</button>
+      </div>
+    }
+  </div>
+}
+
+@if (exito()) {
+  <div class="alerta alerta-exito">✔ {{ exito() }}</div>
+}

@@ -1,0 +1,70 @@
+<h1>Consultar pedidos por estado</h1>
+<p class="subtitulo">Seleccione un estado para filtrar los pedidos.</p>
+
+<div class="card">
+  <div class="fila">
+    <div class="campo">
+      <label for="estado">Estado</label>
+      <select id="estado" [(ngModel)]="estado">
+        @for (e of estados; track e) {
+          <option [ngValue]="e">{{ etiqueta[e] }}</option>
+        }
+      </select>
+    </div>
+    <div class="campo">
+      <label for="sede">Sede</label>
+      <select id="sede" [(ngModel)]="idSede">
+        <option [ngValue]="null">Todas</option>
+        @for (s of sedes(); track s.idSede) {
+          <option [ngValue]="s.idSede">{{ s.nombre }}</option>
+        }
+      </select>
+    </div>
+    <button class="btn btn-primario" (click)="mensaje.set(null); filtrar()">Filtrar</button>
+  </div>
+  <div class="chips">
+    @for (r of resumen(); track r.estado) {
+      <span [class]="'badge badge-' + r.estado" [class.sel]="r.estado === estado" (click)="seleccionarChip(r.estado)">
+        {{ etiqueta[r.estado] }} {{ r.cantidad }}
+      </span>
+    }
+  </div>
+</div>
+
+@if (mensaje(); as m) {
+  <div class="alerta" [class.alerta-exito]="m.tipo === 'exito'" [class.alerta-error]="m.tipo === 'error'">
+    {{ m.tipo === 'exito' ? '✔ ' : '' }}{{ m.texto }}
+  </div>
+}
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>N° pedido</th><th>Cliente</th><th>Fecha y hora de recojo</th><th>Sede</th><th>Estado</th><th>Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (p of pedidos(); track p.idPedido) {
+        <tr>
+          <td class="nw">{{ p.numero }}</td>
+          <td>{{ p.cliente }}</td>
+          <td>{{ p.fechaRecojo | fecha }} {{ p.horaRecojo | hora }}</td>
+          <td>{{ p.sede }}</td>
+          <td><app-estado-badge [estado]="p.estado" /></td>
+          <td>
+            @if (accion(p); as a) {
+              <button class="btn btn-secundario btn-chico" (click)="avanzar(p)">{{ a.texto }}</button>
+            } @else if (puedeEntregar(p)) {
+              <a class="btn btn-secundario btn-chico" [routerLink]="['/entregas']" [queryParams]="{ numero: p.numero }">Entregar</a>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="6" class="vacio">{{ cargando() ? 'Cargando…' : 'No existen pedidos con el estado seleccionado.' }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

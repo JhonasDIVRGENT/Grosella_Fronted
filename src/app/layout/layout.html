@@ -1,0 +1,17 @@
+<header class="topbar">
+  <span class="marca">Pastelería Grosella · Gestión de Pedidos</span>
+  <span class="usuario" [title]="nombre()">{{ usuarioActual() }}</span>
+</header>
+
+<div class="contenedor">
+  <nav class="sidebar">
+    @for (o of menu(); track o.ruta) {
+      <a [routerLink]="o.ruta" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">{{ o.texto }}</a>
+    }
+    <a href="" (click)="$event.preventDefault(); cerrarSesion()">Cerrar sesión</a>
+  </nav>
+
+  <main class="contenido">
+    <router-outlet />
+  </main>
+</div>

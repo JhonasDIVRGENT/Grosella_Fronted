@@ -1,0 +1,193 @@
+/* =====================================================================
+   Pastelería Grosella · Estilos generales (según los prototipos GUI)
+   ===================================================================== */
+:root {
+  --granate: #7a1f3d;
+  --granate-oscuro: #5e1730;
+  --rosa-claro: #f3dfe5;
+  --fondo: #f6f1ef;
+  --borde: #e6dad6;
+  --borde-input: #cfc3bf;
+  --texto: #2b2b2b;
+  --texto-suave: #7d7d7d;
+  --rojo: #b3261e;
+  --verde: #2e7d32;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+  font-size: 15px;
+  color: var(--texto);
+  background: var(--fondo);
+}
+
+/* ---------- Estructura ---------- */
+.topbar {
+  height: 64px;
+  background: var(--granate);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.topbar .marca { font-size: 21px; font-weight: 700; letter-spacing: .2px; }
+.topbar .usuario { font-size: 14px; opacity: .95; }
+
+.contenedor { display: flex; min-height: calc(100vh - 64px); }
+
+.sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid var(--borde);
+  padding-top: 20px;
+}
+.sidebar a {
+  display: block;
+  padding: 13px 26px;
+  color: #444;
+  text-decoration: none;
+  border-left: 4px solid transparent;
+}
+.sidebar a:hover { background: #faf3f5; }
+.sidebar a.activo {
+  background: var(--rosa-claro);
+  border-left-color: var(--granate);
+  color: var(--granate);
+  font-weight: 600;
+}
+
+.contenido { flex: 1; padding: 26px 34px 40px; max-width: 1180px; }
+
+h1 { color: var(--granate); font-size: 26px; margin: 0 0 4px; font-weight: 700; }
+.subtitulo { color: var(--texto-suave); margin: 0 0 22px; }
+
+/* ---------- Tarjetas ---------- */
+.card {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 20px 22px;
+  margin-bottom: 18px;
+}
+.card h2 {
+  color: var(--granate);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  margin: 0 0 14px;
+}
+
+/* ---------- Formularios ---------- */
+.fila { display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; }
+.campo { display: flex; flex-direction: column; flex: 1; min-width: 150px; }
+.campo.angosto { flex: 0 0 140px; min-width: 120px; }
+.campo label { font-size: 13px; color: #666; margin-bottom: 5px; }
+.campo + .campo { margin-top: 0; }
+.grupo + .grupo { margin-top: 14px; }
+
+input, select, textarea {
+  font: inherit;
+  padding: 9px 12px;
+  border: 1px solid var(--borde-input);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--texto);
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid #e7b9c8; border-color: var(--granate); }
+input[readonly], input:disabled { background: #f5f0ee; color: #444; }
+textarea { min-height: 80px; resize: vertical; }
+.check { display: flex; align-items: center; gap: 6px; white-space: nowrap; padding-bottom: 9px; cursor: pointer; }
+.check input { width: auto; }
+.error-campo { color: var(--rojo); font-size: 12px; margin-top: 4px; }
+
+/* ---------- Botones ---------- */
+.btn {
+  font: inherit;
+  font-weight: 600;
+  padding: 9px 22px;
+  border-radius: 6px;
+  border: 1px solid var(--granate);
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-primario { background: var(--granate); color: #fff; }
+.btn-primario:hover { background: var(--granate-oscuro); }
+.btn-secundario { background: #fff; color: var(--granate); font-weight: 500; }
+.btn-secundario:hover { background: #fbf2f5; }
+.btn-peligro { background: var(--rojo); border-color: var(--rojo); color: #fff; }
+.btn-chico { padding: 4px 12px; font-size: 13px; font-weight: 500; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.acciones { display: flex; gap: 12px; margin-top: 16px; }
+
+/* ---------- Tablas ---------- */
+table { width: 100%; border-collapse: collapse; }
+th {
+  white-space: nowrap;
+  background: var(--rosa-claro);
+  color: var(--granate);
+  text-align: left;
+  font-weight: 600;
+  padding: 11px 13px;
+}
+td { padding: 11px 13px; border-bottom: 1px solid #ece4e1; }
+.der { text-align: right; }
+.centro { text-align: center; }
+.total { text-align: right; margin-top: 12px; font-size: 17px; }
+.total strong { font-size: 19px; }
+.vacio { color: var(--texto-suave); padding: 18px 4px 6px; text-align: center; }
+.link { color: var(--granate); cursor: pointer; text-decoration: underline; background: none; border: 0; font: inherit; padding: 0; }
+
+/* ---------- Datos (etiqueta : valor) ---------- */
+.datos { display: grid; grid-template-columns: 1fr 1.2fr 1fr 1.2fr; row-gap: 10px; column-gap: 12px; align-items: center; }
+.datos .et { color: #888; }
+.datos .val { font-weight: 600; }
+
+/* ---------- Etiquetas de estado ---------- */
+.badge { display: inline-block; padding: 3px 13px; border-radius: 14px; font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+.badge-REGISTRADO        { background: #e4e8f8; color: #3446a8; }
+.badge-CONFIRMADO        { background: #dcf2ef; color: #0f7a6c; }
+.badge-EN_PREPARACION    { background: #fdeedc; color: #d9480f; }
+.badge-LISTO_PARA_RECOJO { background: #e2f3df; color: #2e7d32; }
+.badge-ENTREGADO         { background: #e8eaed; color: #4b5563; }
+.badge-CANCELADO         { background: #fde4e4; color: #c62828; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.chips .badge { cursor: pointer; border: 1px solid transparent; }
+.chips .badge.sel { border-color: currentColor; }
+
+/* ---------- Mensajes ---------- */
+.alerta { border-radius: 8px; padding: 13px 18px; margin-bottom: 18px; border: 1px solid; }
+.alerta-exito { background: #e9f6ea; border-color: #a5d6a7; color: #1b5e20; }
+.alerta-error { background: #fdecec; border-color: #f2b8b5; color: #8c1d18; }
+.alerta-aviso { background: #fff6e5; border-color: #f5d28e; color: #7a4f01; }
+.rojo { color: var(--rojo); }
+.verde { color: var(--verde); }
+
+/* ---------- Inicio ---------- */
+.tarjetas-estado { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 18px; }
+.tarjeta-estado { background: #fff; border: 1px solid var(--borde); border-radius: 10px; padding: 14px; cursor: pointer; text-decoration: none; color: inherit; }
+.tarjeta-estado:hover { border-color: var(--granate); }
+.tarjeta-estado .numero { font-size: 28px; font-weight: 700; margin-top: 8px; color: var(--texto); }
+
+/* ---------- Login ---------- */
+.login-fondo { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--fondo); }
+.login-card { width: 380px; background: #fff; border: 1px solid var(--borde); border-radius: 12px; overflow: hidden; }
+.login-card header { background: var(--granate); color: #fff; padding: 22px 26px; }
+.login-card header h1 { color: #fff; font-size: 22px; margin: 0; }
+.login-card header p { margin: 4px 0 0; opacity: .9; font-size: 14px; }
+.login-card form { padding: 24px 26px 26px; }
+.login-card .btn { width: 100%; margin-top: 18px; padding: 11px; }
+.ayuda { font-size: 12.5px; color: var(--texto-suave); margin-top: 16px; line-height: 1.5; }
+.nw { white-space: nowrap; }

@@ -1,0 +1,39 @@
+<h1>Bienvenido(a), {{ sesion()?.nombres }}</h1>
+<p class="subtitulo">
+  {{ sesion() ? etiquetaRol[sesion()!.rol] : '' }} · {{ idSede ? 'Sede ' + sesion()?.sede : 'Todas las sedes' }} · {{ hoy }}
+</p>
+
+@if (error()) {
+  <div class="alerta alerta-error">{{ error() }}</div>
+}
+
+<div class="tarjetas-estado">
+  @for (r of resumen(); track r.estado) {
+    <a class="tarjeta-estado" [routerLink]="['/pedidos']" [queryParams]="{ estado: r.estado }">
+      <span class="badge" [class]="'badge badge-' + r.estado">{{ etiquetaEstado[r.estado] }}</span>
+      <div class="numero">{{ r.cantidad }}</div>
+    </a>
+  }
+</div>
+
+<div class="card">
+  <h2>Próximos recojos</h2>
+  <table>
+    <thead>
+      <tr><th>N° pedido</th><th>Cliente</th><th>Fecha y hora de recojo</th><th>Sede</th><th>Estado</th></tr>
+    </thead>
+    <tbody>
+      @for (p of proximos(); track p.idPedido) {
+        <tr>
+          <td class="nw">{{ p.numero }}</td>
+          <td>{{ p.cliente }}</td>
+          <td>{{ p.fechaRecojo | fecha }} {{ p.horaRecojo | hora }}</td>
+          <td>{{ p.sede }}</td>
+          <td><app-estado-badge [estado]="p.estado" /></td>
+        </tr>
+      } @empty {
+        <tr><td colspan="5" class="vacio">No hay pedidos pendientes de recojo.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

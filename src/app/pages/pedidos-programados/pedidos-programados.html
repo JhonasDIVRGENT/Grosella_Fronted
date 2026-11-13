@@ -1,0 +1,63 @@
+<h1>Pedidos programados</h1>
+<p class="subtitulo">Pedidos ordenados por hora de recojo, con sus productos y personalización.</p>
+
+<div class="card">
+  <div class="fila">
+    <div class="campo">
+      <label for="fecha">Fecha</label>
+      <input id="fecha" type="date" [(ngModel)]="fecha" />
+    </div>
+    <div class="campo">
+      <label for="desde">Hora desde</label>
+      <input id="desde" type="time" [(ngModel)]="desde" />
+    </div>
+    <div class="campo">
+      <label for="hasta">Hora hasta</label>
+      <input id="hasta" type="time" [(ngModel)]="hasta" />
+    </div>
+    <div class="campo">
+      <label for="sede">Sede</label>
+      <select id="sede" [(ngModel)]="idSede">
+        <option [ngValue]="null">Todas</option>
+        @for (s of sedes(); track s.idSede) {
+          <option [ngValue]="s.idSede">Sede {{ s.nombre }}</option>
+        }
+      </select>
+    </div>
+    <button class="btn btn-primario" (click)="mensaje.set(null); buscar()">Buscar</button>
+  </div>
+</div>
+
+@if (mensaje(); as m) {
+  <div class="alerta" [class.alerta-exito]="m.tipo === 'exito'" [class.alerta-error]="m.tipo === 'error'">
+    {{ m.tipo === 'exito' ? '✔ ' : '' }}{{ m.texto }}
+  </div>
+}
+
+<div class="card">
+  <table>
+    <thead>
+      <tr><th>Hora</th><th>N° pedido</th><th>Productos</th><th>Personalización</th><th>Estado</th><th></th></tr>
+    </thead>
+    <tbody>
+      @for (p of pedidos(); track p.idPedido) {
+        <tr>
+          <td class="nw">{{ p.horaRecojo | hora }}</td>
+          <td class="nw">{{ p.numero }}</td>
+          <td>{{ p.productos }}</td>
+          <td>{{ p.personalizacion || '—' }}</td>
+          <td><app-estado-badge [estado]="p.estado" /></td>
+          <td>
+            @if (accion(p); as a) {
+              <button class="btn btn-secundario btn-chico" (click)="avanzar(p)">{{ a.texto }}</button>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="6" class="vacio">{{ buscado() ? 'No hay pedidos programados para los filtros seleccionados.' : 'Cargando…' }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

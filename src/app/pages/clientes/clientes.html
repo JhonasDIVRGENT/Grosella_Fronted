@@ -1,0 +1,82 @@
+<h1>Historial de pedidos del cliente</h1>
+<p class="subtitulo">Busque al cliente por DNI o nombre para ver sus pedidos anteriores.</p>
+
+<div class="card">
+  <form class="fila" (ngSubmit)="buscar()">
+    <div class="campo">
+      <label for="texto">DNI o nombre</label>
+      <input id="texto" name="texto" [(ngModel)]="texto" placeholder="Ej.: 45872136 o María Quispe" />
+    </div>
+    <button class="btn btn-primario" type="submit">Buscar</button>
+  </form>
+</div>
+
+@if (error()) {
+  <div class="alerta alerta-error">{{ error() }}</div>
+}
+@if (aviso()) {
+  <div class="alerta alerta-aviso">
+    {{ aviso() }}
+    @if (aviso() === 'No se encontraron resultados.') {
+      <a class="link" routerLink="/clientes/nuevo">Registrar nuevo cliente</a>
+    }
+  </div>
+}
+
+@if (resultados().length > 0) {
+  <div class="card">
+    <h2>Clientes encontrados</h2>
+    <table>
+      <thead><tr><th>Cliente</th><th>DNI</th><th>Teléfono</th><th>Pedidos</th><th></th></tr></thead>
+      <tbody>
+        @for (c of resultados(); track c.idCliente) {
+          <tr>
+            <td>{{ c.nombreCompleto }}</td>
+            <td>{{ c.dni }}</td>
+            <td>{{ c.telefono }}</td>
+            <td>{{ c.cantidadPedidos }}</td>
+            <td class="der"><button class="btn btn-secundario btn-chico" (click)="seleccionar(c)">Ver historial</button></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (historial(); as h) {
+  <div class="card">
+    <h2>Datos del cliente</h2>
+    <div class="datos">
+      <span class="et">Nombres:</span><span class="val">{{ h.cliente.nombreCompleto }}</span>
+      <span class="et">DNI:</span><span class="val">{{ h.cliente.dni }}</span>
+      <span class="et">Teléfono:</span><span class="val">{{ h.cliente.telefono }}</span>
+      <span class="et">Pedidos:</span><span class="val">{{ h.cliente.cantidadPedidos }}</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Pedidos realizados</h2>
+    <table>
+      <thead>
+        <tr><th>N° pedido</th><th>Fecha recojo</th><th>Productos</th><th>Sede</th><th>Estado del pedido</th><th>Estado de pago</th></tr>
+      </thead>
+      <tbody>
+        @for (p of h.pedidos; track p.idPedido) {
+          <tr>
+            <td class="nw">{{ p.numero }}</td>
+            <td>{{ p.fechaRecojo | fecha }}</td>
+            <td>{{ p.productos }}</td>
+            <td>{{ p.sede }}</td>
+            <td><app-estado-badge [estado]="p.estado" /></td>
+            <td>{{ p.estadoPago | estadoPago }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="vacio">El cliente no tiene pedidos registrados.</td></tr>
+        }
+      </tbody>
+    </table>
+    <div class="acciones">
+      <a class="btn btn-secundario" [routerLink]="['/pedidos/nuevo']" [queryParams]="{ dni: h.cliente.dni }">Registrar pedido para este cliente</a>
+    </div>
+  </div>
+}

@@ -1,0 +1,137 @@
+<h1>Registrar pedido</h1>
+<p class="subtitulo">Complete los datos del cliente, los productos y la fecha de recojo.</p>
+
+@if (registrado(); as p) {
+  <div class="alerta alerta-exito">
+    ✔ Pedido <b>{{ p.numero }}</b> registrado con estado "Registrado". Total {{ p.total | soles }} · Adelanto
+    {{ p.adelanto | soles }} · Saldo pendiente {{ p.saldo | soles }}.
+  </div>
+}
+@if (error()) {
+  <div class="alerta alerta-error">{{ error() }}</div>
+}
+
+<!-- CLIENTE -->
+<div class="card">
+  <h2>Cliente</h2>
+  <div class="fila">
+    <div class="campo">
+      <label for="dni">DNI del cliente</label>
+      <input id="dni" [(ngModel)]="dniBusqueda" maxlength="8" inputmode="numeric" (keyup.enter)="buscarCliente()" />
+    </div>
+    <button class="btn btn-secundario" (click)="buscarCliente()">Buscar</button>
+    <div class="campo">
+      <label>Nombres y apellidos</label>
+      <input [value]="cliente()?.nombreCompleto ?? ''" readonly />
+    </div>
+    <div class="campo">
+      <label>Teléfono</label>
+      <input [value]="cliente()?.telefono ?? ''" readonly />
+    </div>
+  </div>
+  @if (clienteNoExiste()) {
+    <div class="alerta alerta-aviso" style="margin: 14px 0 0">
+      El cliente con DNI {{ dniBusqueda }} no está registrado.
+      <a class="link" [routerLink]="['/clientes/nuevo']" [queryParams]="{ dni: dniBusqueda }">Registrar cliente</a>
+    </div>
+  }
+</div>
+
+<!-- PRODUCTOS -->
+<div class="card">
+  <h2>Productos</h2>
+  <div class="fila">
+    <div class="campo">
+      <label for="producto">Producto</label>
+      <select id="producto" [(ngModel)]="idProducto">
+        <option [ngValue]="null" disabled>Seleccione…</option>
+        @for (p of productos(); track p.idProducto) {
+          <option [ngValue]="p.idProducto">{{ p.nombre }} — {{ p.precio | soles }}</option>
+        }
+      </select>
+    </div>
+    <div class="campo">
+      <label for="cantidad">Cantidad</label>
+      <input id="cantidad" type="number" min="1" [(ngModel)]="cantidad" />
+    </div>
+    <button class="btn btn-secundario" (click)="agregar()">+ Agregar</button>
+    <label class="check"><input type="checkbox" [(ngModel)]="personalizado" /> Pedido personalizado</label>
+  </div>
+
+  <table style="margin-top: 16px">
+    <thead>
+      <tr><th>Producto</th><th class="centro">Cant.</th><th class="der">P. unit.</th><th class="der">Subtotal</th><th></th></tr>
+    </thead>
+    <tbody>
+      @for (i of items(); track i.producto.idProducto) {
+        <tr>
+          <td>{{ i.producto.nombre }}{{ personalizado && i.producto.categoria === 'Tortas' ? ' – personalizada' : '' }}</td>
+          <td class="centro">{{ i.cantidad }}</td>
+          <td class="der">{{ i.producto.precio | soles }}</td>
+          <td class="der">{{ i.producto.precio * i.cantidad | soles }}</td>
+          <td class="der"><button class="link" title="Quitar" (click)="quitar(i)">Quitar</button></td>
+        </tr>
+      } @empty {
+        <tr><td colspan="5" class="vacio">Aún no se agregaron productos.</td></tr>
+      }
+    </tbody>
+  </table>
+  <div class="total">Total: <strong>{{ total() | soles }}</strong></div>
+</div>
+
+<!-- CU09 PERSONALIZACIÓN -->
+@if (personalizado) {
+  <div class="card">
+    <h2>Personalización del pedido</h2>
+    <div class="fila grupo">
+      <div class="campo"><label>Tamaño</label><input [(ngModel)]="personalizacion.tamano" maxlength="30" placeholder="Ej.: 20 porciones" /></div>
+      <div class="campo"><label>Decoración</label><input [(ngModel)]="personalizacion.decoracion" maxlength="120" placeholder="Ej.: Decoración rosada" /></div>
+      <div class="campo"><label>Nombres / texto</label><input [(ngModel)]="personalizacion.nombres" maxlength="80" placeholder="Ej.: Feliz cumpleaños Sofía" /></div>
+    </div>
+    <div class="fila grupo">
+      <div class="campo"><label>Toppers</label><input [(ngModel)]="personalizacion.toppers" maxlength="80" /></div>
+      <div class="campo"><label>Velas</label><input [(ngModel)]="personalizacion.velas" maxlength="40" /></div>
+      <div class="campo"><label>Indicaciones adicionales</label><input [(ngModel)]="personalizacion.observaciones" /></div>
+    </div>
+  </div>
+}
+
+<!-- RECOJO Y ADELANTO -->
+<div class="card">
+  <h2>Recojo y adelanto</h2>
+  <div class="fila grupo">
+    <div class="campo">
+      <label for="sede">Sede de recojo</label>
+      <select id="sede" [(ngModel)]="idSede">
+        @for (s of sedes(); track s.idSede) {
+          <option [ngValue]="s.idSede">Sede {{ s.nombre }}</option>
+        }
+      </select>
+    </div>
+    <div class="campo">
+      <label for="fecha">Fecha de recojo</label>
+      <input id="fecha" type="date" [min]="minFecha" [(ngModel)]="fechaRecojo" />
+    </div>
+    <div class="campo">
+      <label for="hora">Hora</label>
+      <input id="hora" type="time" [(ngModel)]="horaRecojo" />
+    </div>
+    <div class="campo">
+      <label for="adelanto">Adelanto (50 %)</label>
+      <input id="adelanto" type="number" min="0" step="0.10" [ngModel]="adelanto()" (ngModelChange)="cambiarAdelanto($event)" />
+    </div>
+    <div class="campo">
+      <label>Saldo pendiente</label>
+      <input [value]="saldo() | soles" readonly />
+    </div>
+  </div>
+  <div class="campo grupo">
+    <label for="obs">Observaciones</label>
+    <input id="obs" [(ngModel)]="observaciones" />
+  </div>
+</div>
+
+<div class="acciones">
+  <button class="btn btn-primario" (click)="registrar()" [disabled]="guardando()">Registrar</button>
+  <button class="btn btn-secundario" (click)="limpiar()">Cancelar</button>
+</div>
