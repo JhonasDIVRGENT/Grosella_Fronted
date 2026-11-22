@@ -2,12 +2,24 @@
 <p class="subtitulo">Busque al cliente por DNI o nombre para ver sus pedidos anteriores.</p>
 
 <div class="card">
+  <div class="fila" style="margin-bottom: 14px">
+    <div class="campo" style="flex: 2">
+      <label>Seleccione un cliente de la lista</label>
+      <app-selector-busqueda
+        [opciones]="opciones()"
+        [valor]="historial()?.cliente?.idCliente ?? null"
+        placeholder="Abra la lista y elija un cliente…"
+        vacio="No hay clientes que coincidan."
+        (seleccion)="elegir($event)"
+      />
+    </div>
+  </div>
   <form class="fila" (ngSubmit)="buscar()">
     <div class="campo">
-      <label for="texto">DNI o nombre</label>
+      <label for="texto">O busque por DNI o nombre</label>
       <input id="texto" name="texto" [(ngModel)]="texto" placeholder="Ej.: 45872136 o María Quispe" />
     </div>
-    <button class="btn btn-primario" type="submit">Buscar</button>
+    <button class="btn btn-secundario" type="submit">Buscar</button>
   </form>
 </div>
 

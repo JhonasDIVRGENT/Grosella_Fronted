@@ -14,6 +14,11 @@ export class ClienteService {
     return this.http.get<Cliente[]>(this.url, { params: new HttpParams().set('q', texto) });
   }
 
+  /** Lista completa de clientes (para el selector desplegable). */
+  todos(): Observable<Cliente[]> {
+    return this.http.get<Cliente[]>(this.url);
+  }
+
   buscarPorDni(dni: string): Observable<Cliente> {
     return this.http.get<Cliente>(`${this.url}/dni/${dni}`);
   }

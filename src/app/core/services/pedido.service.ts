@@ -1,7 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ESTADOS } from '../utils/estados';
 import { EstadoPedido, PedidoDetalle, PedidoRequest, PedidoResumen, ResumenEstado } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -24,6 +25,13 @@ export class PedidoService {
     let params = new HttpParams().set('estado', estado);
     if (idSede) params = params.set('idSede', idSede);
     return this.http.get<PedidoResumen[]>(this.url, { params });
+  }
+
+  /** Todos los pedidos (se piden por estado y se unen) para los selectores desplegables. */
+  todos(): Observable<PedidoResumen[]> {
+    return forkJoin(ESTADOS.map((e) => this.porEstado(e))).pipe(
+      map((listas) => listas.flat().sort((a, b) => b.idPedido - a.idPedido)),
+    );
   }
 
   resumenEstados(idSede?: number | null): Observable<ResumenEstado[]> {
