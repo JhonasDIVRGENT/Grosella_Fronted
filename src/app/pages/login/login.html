@@ -1,28 +1,56 @@
 <div class="login-fondo">
-  <div class="login-card">
-    <header>
+  <section class="login-marca">
+    <div class="login-marca-contenido">
+      <span class="login-logo">🍰</span>
       <h1>Pastelería Grosella</h1>
-      <p>Gestión de Pedidos · Iniciar sesión</p>
-    </header>
-    <form (ngSubmit)="ingresar()">
+      <p>Gestión de pedidos, pagos y entregas en un solo lugar.</p>
+      <ul>
+        <li>Registre pedidos y personalizaciones</li>
+        <li>Controle adelantos y saldos</li>
+        <li>Siga cada pedido hasta la entrega</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="login-panel">
+    <form class="login-form" (ngSubmit)="ingresar()">
+      <h2>Bienvenido</h2>
+      <p class="login-sub">Ingrese con su usuario para continuar.</p>
+
       @if (error()) {
-        <div class="alerta alerta-error">{{ error() }}</div>
+        <div class="alerta alerta-error" role="alert">{{ error() }}</div>
       }
+
       <div class="campo grupo">
         <label for="usuario">Usuario</label>
-        <input id="usuario" name="usuario" [(ngModel)]="usuario" autocomplete="username" autofocus />
+        <input id="usuario" name="usuario" [(ngModel)]="usuario" autocomplete="username" placeholder="Ej.: atencion" autofocus />
       </div>
       <div class="campo grupo">
         <label for="contrasena">Contraseña</label>
-        <input id="contrasena" name="contrasena" type="password" [(ngModel)]="contrasena" autocomplete="current-password" />
+        <div class="input-clave">
+          <input
+            id="contrasena"
+            name="contrasena"
+            [type]="verClave() ? 'text' : 'password'"
+            [(ngModel)]="contrasena"
+            autocomplete="current-password"
+            placeholder="••••••"
+          />
+          <button type="button" class="ver-clave" (click)="verClave.set(!verClave())" [attr.aria-label]="verClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+            {{ verClave() ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </div>
       </div>
+
       <button class="btn btn-primario" type="submit" [disabled]="cargando()">
         {{ cargando() ? 'Ingresando…' : 'Ingresar' }}
       </button>
-      <p class="ayuda">
-        Versión V01 (simulación). Usuarios de prueba: <b>admin</b>, <b>atencion</b>, <b>encargado</b>,
-        <b>preparacion</b> · contraseña <b>123456</b>
-      </p>
+
+      <div class="ayuda">
+        <b>Versión V01 (simulación)</b><br />
+        Usuarios de prueba: <code>admin</code> · <code>atencion</code> · <code>encargado</code> · <code>preparacion</code><br />
+        Contraseña: <code>123456</code>
+      </div>
     </form>
-  </div>
+  </section>
 </div>

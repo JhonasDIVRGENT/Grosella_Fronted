@@ -15,20 +15,27 @@
 <div class="card">
   <h2>Cliente</h2>
   <div class="fila">
-    <div class="campo">
-      <label for="dni">DNI del cliente</label>
-      <input id="dni" [(ngModel)]="dniBusqueda" maxlength="8" inputmode="numeric" (keyup.enter)="buscarCliente()" />
+    <div class="campo" style="flex: 2">
+      <label>Seleccione al cliente (escriba su nombre, DNI o teléfono para filtrar)</label>
+      <app-selector-busqueda
+        [opciones]="opcionesCliente()"
+        [valor]="cliente()?.idCliente ?? null"
+        placeholder="Abra la lista y elija un cliente…"
+        vacio="No hay clientes que coincidan."
+        (seleccion)="elegirCliente($event)"
+      />
     </div>
-    <button class="btn btn-secundario" (click)="buscarCliente()">Buscar</button>
-    <div class="campo">
-      <label>Nombres y apellidos</label>
-      <input [value]="cliente()?.nombreCompleto ?? ''" readonly />
-    </div>
-    <div class="campo">
-      <label>Teléfono</label>
-      <input [value]="cliente()?.telefono ?? ''" readonly />
-    </div>
+    <a class="btn btn-secundario" [routerLink]="['/clientes/nuevo']">+ Nuevo cliente</a>
   </div>
+  @if (cliente(); as c) {
+    <div class="cliente-ficha">
+      <div class="avatar">{{ c.nombres.charAt(0) }}{{ c.apellidos.charAt(0) }}</div>
+      <div>
+        <strong>{{ c.nombreCompleto }}</strong>
+        <div class="texto-suave">DNI {{ c.dni }} · Tel. {{ c.telefono }} · {{ c.cantidadPedidos }} pedido(s)</div>
+      </div>
+    </div>
+  }
   @if (clienteNoExiste()) {
     <div class="alerta alerta-aviso" style="margin: 14px 0 0">
       El cliente con DNI {{ dniBusqueda }} no está registrado.
@@ -40,25 +47,39 @@
 <!-- PRODUCTOS -->
 <div class="card">
   <h2>Productos</h2>
-  <div class="fila">
-    <div class="campo">
-      <label for="producto">Producto</label>
-      <select id="producto" [(ngModel)]="idProducto">
-        <option [ngValue]="null" disabled>Seleccione…</option>
-        @for (p of productos(); track p.idProducto) {
-          <option [ngValue]="p.idProducto">{{ p.nombre }} — {{ p.precio | soles }}</option>
-        }
-      </select>
+  <div class="fila" style="margin-bottom: 14px">
+    <div class="chips" style="margin: 0; flex: 1">
+      <button type="button" class="chip" [class.sel]="!categoriaSel()" (click)="categoriaSel.set('')">Todos</button>
+      @for (c of categorias(); track c) {
+        <button type="button" class="chip" [class.sel]="categoriaSel() === c" (click)="categoriaSel.set(c)">{{ c }}</button>
+      }
     </div>
-    <div class="campo">
-      <label for="cantidad">Cantidad</label>
-      <input id="cantidad" type="number" min="1" [(ngModel)]="cantidad" />
+    <div class="campo" style="flex: 0 0 240px">
+      <input placeholder="Buscar producto…" [ngModel]="textoProducto()" (ngModelChange)="textoProducto.set($event)" />
     </div>
-    <button class="btn btn-secundario" (click)="agregar()">+ Agregar</button>
     <label class="check"><input type="checkbox" [(ngModel)]="personalizado" /> Pedido personalizado</label>
   </div>
 
-  <table style="margin-top: 16px">
+  <div class="productos-grid">
+    @for (p of productosFiltrados(); track p.idProducto) {
+      <button type="button" class="producto" [class.en-pedido]="cantidadEn(p) > 0" (click)="agregarProducto(p)">
+        @if (cantidadEn(p) > 0) {
+          <span class="producto-cant">{{ cantidadEn(p) }}</span>
+        }
+        <span class="producto-cat">{{ p.categoria }}</span>
+        <span class="producto-nombre">{{ p.nombre }}</span>
+        <span class="producto-pie">
+          <span class="producto-precio">{{ p.precio | soles }}</span>
+          <span class="producto-mas">+ Agregar</span>
+        </span>
+      </button>
+    } @empty {
+      <p class="vacio" style="grid-column: 1 / -1">No hay productos que coincidan.</p>
+    }
+  </div>
+
+  <h2 style="margin: 22px 0 8px">Detalle del pedido</h2>
+  <table>
     <thead>
       <tr><th>Producto</th><th class="centro">Cant.</th><th class="der">P. unit.</th><th class="der">Subtotal</th><th></th></tr>
     </thead>
@@ -66,13 +87,19 @@
       @for (i of items(); track i.producto.idProducto) {
         <tr>
           <td>{{ i.producto.nombre }}{{ personalizado && i.producto.categoria === 'Tortas' ? ' – personalizada' : '' }}</td>
-          <td class="centro">{{ i.cantidad }}</td>
+          <td class="centro">
+            <span class="stepper">
+              <button type="button" (click)="cambiarCantidad(i, -1)" title="Quitar una unidad">−</button>
+              <span>{{ i.cantidad }}</span>
+              <button type="button" (click)="cambiarCantidad(i, 1)" title="Agregar una unidad">+</button>
+            </span>
+          </td>
           <td class="der">{{ i.producto.precio | soles }}</td>
           <td class="der">{{ i.producto.precio * i.cantidad | soles }}</td>
           <td class="der"><button class="link" title="Quitar" (click)="quitar(i)">Quitar</button></td>
         </tr>
       } @empty {
-        <tr><td colspan="5" class="vacio">Aún no se agregaron productos.</td></tr>
+        <tr><td colspan="5" class="vacio">Aún no se agregaron productos. Haga clic en un producto para agregarlo.</td></tr>
       }
     </tbody>
   </table>

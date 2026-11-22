@@ -8,6 +8,7 @@ import { ClienteService } from '../../core/services/cliente.service';
 import { PedidoService } from '../../core/services/pedido.service';
 import { hoyISO, mensajeError } from '../../core/utils/estados';
 import { SolesPipe } from '../../shared/pipes';
+import { OpcionSelector, SelectorBusqueda } from '../../shared/selector-busqueda';
 
 interface Item {
   producto: Producto;
@@ -17,7 +18,7 @@ interface Item {
 /** CU08 Registrar pedido (incluye CU16 Buscar cliente y extiende CU09 Personalización). */
 @Component({
   selector: 'app-registrar-pedido',
-  imports: [FormsModule, RouterLink, SolesPipe],
+  imports: [FormsModule, RouterLink, SolesPipe, SelectorBusqueda],
   templateUrl: './registrar-pedido.html',
 })
 export class RegistrarPedido implements OnInit {
@@ -30,7 +31,26 @@ export class RegistrarPedido implements OnInit {
 
   readonly sedes = signal<Sede[]>([]);
   readonly productos = signal<Producto[]>([]);
+  readonly clientes = signal<Cliente[]>([]);
+  readonly opcionesCliente = computed<OpcionSelector[]>(() =>
+    this.clientes().map((c) => ({
+      id: c.idCliente,
+      titulo: c.nombreCompleto,
+      detalle: `DNI ${c.dni} · Tel. ${c.telefono}`,
+      busqueda: c.dni + ' ' + c.telefono,
+    })),
+  );
   readonly cliente = signal<Cliente | null>(null);
+  readonly categoriaSel = signal<string>('');
+  readonly textoProducto = signal('');
+  readonly categorias = computed(() => [...new Set(this.productos().map((p) => p.categoria))]);
+  readonly productosFiltrados = computed(() => {
+    const cat = this.categoriaSel();
+    const t = this.textoProducto().trim().toLowerCase();
+    return this.productos().filter(
+      (p) => (!cat || p.categoria === cat) && (!t || p.nombre.toLowerCase().includes(t)),
+    );
+  });
   readonly clienteNoExiste = signal(false);
   readonly items = signal<Item[]>([]);
   readonly total = computed(() => this.items().reduce((s, i) => s + i.producto.precio * i.cantidad, 0));
@@ -55,6 +75,7 @@ export class RegistrarPedido implements OnInit {
   constructor() {
     inject(CatalogoService).sedes().subscribe((s) => this.sedes.set(s));
     inject(CatalogoService).productos().subscribe((p) => this.productos.set(p));
+    this.clienteService.todos().subscribe({ next: (c) => this.clientes.set(c), error: () => this.clientes.set([]) });
   }
 
   ngOnInit(): void {
@@ -80,7 +101,35 @@ export class RegistrarPedido implements OnInit {
     });
   }
 
+  /** Cliente elegido desde la lista desplegable. */
+  elegirCliente(o: OpcionSelector | null): void {
+    this.error.set(null);
+    this.clienteNoExiste.set(false);
+    this.cliente.set(o ? (this.clientes().find((c) => c.idCliente === o.id) ?? null) : null);
+  }
+
   // ---- Productos ----
+  /** Agrega una unidad del producto (clic en la tarjeta). */
+  agregarProducto(producto: Producto): void {
+    this.idProducto = producto.idProducto;
+    this.cantidad = 1;
+    this.agregar();
+  }
+
+  cantidadEn(producto: Producto): number {
+    return this.items().find((i) => i.producto.idProducto === producto.idProducto)?.cantidad ?? 0;
+  }
+
+  cambiarCantidad(item: Item, delta: number): void {
+    const nueva = item.cantidad + delta;
+    if (nueva < 1) {
+      this.quitar(item);
+      return;
+    }
+    this.items.set(this.items().map((i) => (i === item ? { ...i, cantidad: nueva } : i)));
+    this.recalcularAdelanto();
+  }
+
   agregar(): void {
     const producto = this.productos().find((p) => p.idProducto === this.idProducto);
     const cant = Math.floor(Number(this.cantidad));
@@ -177,6 +226,8 @@ export class RegistrarPedido implements OnInit {
     this.items.set([]);
     this.idProducto = null;
     this.cantidad = 1;
+    this.categoriaSel.set('');
+    this.textoProducto.set('');
     this.personalizado = false;
     this.personalizacion = this.personalizacionVacia();
     this.idSede = this.auth.sesion()?.idSede ?? null;

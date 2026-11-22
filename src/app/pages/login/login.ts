@@ -17,6 +17,7 @@ export class Login {
   usuario = '';
   contrasena = '';
   readonly cargando = signal(false);
+  readonly verClave = signal(false);
   readonly error = signal<string | null>(
     inject(ActivatedRoute).snapshot.queryParamMap.has('expirada') ? 'Su sesión expiró. Ingrese nuevamente.' : null,
   );

@@ -3,11 +3,16 @@
 
 <div class="card">
   <form class="fila" (ngSubmit)="buscar()">
-    <div class="campo">
-      <label for="numero">N° de pedido</label>
-      <input id="numero" name="numero" [(ngModel)]="numero" placeholder="Ej.: P-000128" />
+    <div class="campo" style="flex: 2">
+      <label>Seleccione el pedido (busque por cliente o número)</label>
+      <app-selector-busqueda
+        [opciones]="opcionesPedido()"
+        [valor]="pedido()?.numero ?? null"
+        placeholder="Abra la lista y elija un pedido…"
+        vacio="No hay pedidos disponibles."
+        (seleccion)="elegirPedido($event)"
+      />
     </div>
-    <button class="btn btn-secundario" type="submit">Buscar</button>
   </form>
 </div>
 
